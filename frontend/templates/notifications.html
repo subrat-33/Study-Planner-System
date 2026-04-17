@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - StudySmart{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1>Notifications</h1>
+            <p style="color: var(--gray-500);">Stay updated on your study journey</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="clearAllNotifications()">Clear All</button>
+    </div>
+
+    <div id="notifications-list" class="flex flex-column gap-md">
+        <!-- Loading State -->
+        <div id="loading-notifications" class="card" style="text-align: center; padding: 40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+            <p style="margin-top: 10px;">Loading notifications...</p>
+        </div>
+
+        <div id="no-notifications" class="card" style="display: none; text-align: center; padding: 60px;">
+            <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success); margin-bottom: 20px; opacity: 0.3;"></i>
+            <h3>All caught up!</h3>
+            <p style="color: var(--gray-500);">No notifications to show right now.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadNotifications();
+        markAllAsRead();
+    });
+
+    async function loadNotifications() {
+        const listContainer = document.getElementById('notifications-list');
+        const emptyState = document.getElementById('no-notifications');
+        const loadingState = document.getElementById('loading-notifications');
+
+        try {
+            const notifications = await api.get('/notifications');
+            loadingState.style.display = 'none';
+
+            if (notifications.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            // Clear any old items except templates
+            const items = listContainer.querySelectorAll('.notification-card');
+            items.forEach(el => el.remove());
+
+            notifications.forEach(notif => {
+                const card = document.createElement('div');
+                card.className = 'card flex align-center gap-lg notification-card';
+                
+                let icon = 'fa-info-circle';
+                let color = 'var(--primary)';
+                
+                if (notif.notification_type === 'Deadline Alert') {
+                    icon = 'fa-exclamation-triangle';
+                    color = 'var(--danger)';
+                } else if (notif.notification_type === 'Schedule Adjusted') {
+                    icon = 'fa-calendar-alt';
+                    color = 'var(--secondary)';
+                } else if (notif.notification_type.includes('Reminder')) {
+                    icon = 'fa-clock';
+                    color = 'var(--warning)';
+                }
+
+                card.style.borderLeft = `4px solid ${color}`;
+                
+                const timeAgo = formatTimeAgo(new Date(notif.created_at));
+
+                card.innerHTML = `
+                    <div style="font-size: 1.5rem; color: ${color};"><i class="fas ${icon}"></i></div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin-bottom: 4px;">${notif.title}</h4>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">${notif.message}</p>
+                        <span style="font-size: 0.75rem; color: var(--gray-400);">${timeAgo}</span>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error('Failed to load notifications:', error);
+            showToast('Error loading notifications', 'error');
+        }
+    }
+
+    async function markAllAsRead() {
+        try {
+            await api.post('/notifications/mark-as-read');
+            // Update the global badge count if it's visible
+            if (window.loadNotificationsCount) {
+                window.loadNotificationsCount();
+            }
+        } catch (error) {
+            console.error('Failed to mark as read:', error);
+        }
+    }
+
+    async function clearAllNotifications() {
+        if (!confirm('Are you sure you want to clear all notifications?')) return;
+        
+        try {
+            // Since we don't have a DELETE all route yet, we'll mark as read 
+            // and hide them for this demo, or we could implement a DELETE route.
+            await markAllAsRead();
+            loadNotifications();
+        } catch (error) {
+            showToast('Failed to clear notifications', 'error');
+        }
+    }
+
+    function formatTimeAgo(date) {
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+        
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days === 1) return 'Yesterday';
+        return date.toLocaleDateString();
+    }
+</script>
+{% endblock %}

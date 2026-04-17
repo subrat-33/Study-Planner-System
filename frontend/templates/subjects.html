@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Subjects & Syllabus - StudySmart{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1>Subject Management</h1>
+            <p style="color: var(--gray-500);">Add and manage your academic subjects and topics</p>
+        </div>
+        <button class="btn btn-primary" onclick="toggleSubjectModal(true)">
+            <i class="fas fa-plus"></i> Add New Subject
+        </button>
+    </div>
+
+    <!-- Subjects List Area -->
+    <div id="subjects-container" class="grid-layout" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px;">
+        <!-- Subject Cards will be injected here -->
+        <div id="empty-subjects" class="card" style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+            <i class="fas fa-book-open" style="font-size: 3rem; color: var(--gray-300); margin-bottom: 20px;"></i>
+            <h3>No subjects added yet</h3>
+            <p style="color: var(--gray-500); margin-bottom: 24px;">Start by adding the subjects you want to study for.</p>
+            <button class="btn btn-primary" onclick="toggleSubjectModal(true)">Add Your First Subject</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Subject Modal -->
+<div id="subject-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="card-header">
+            <h3 id="modal-title">Add New Subject</h3>
+            <button class="btn btn-outline btn-sm" onclick="toggleSubjectModal(false)">×</button>
+        </div>
+        <form id="subject-form">
+            <input type="hidden" id="subj-id">
+            <div class="form-group">
+                <label class="form-label">Subject Name</label>
+                <input type="text" id="subj-name" class="form-input" placeholder="e.g. Data Structures & Algorithms" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label class="form-label">Difficulty</label>
+                    <select id="subj-difficulty" class="form-input form-select" required>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Exam Deadline</label>
+                    <input type="date" id="subj-deadline" class="form-input" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Study Hours Per Week</label>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="range" id="subj-hours" class="form-input" min="1" max="20" value="5" oninput="document.getElementById('hours-val').innerText = this.value">
+                    <span id="hours-val" style="font-weight: 600; min-width: 40px;">5</span> hrs
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description (Optional)</label>
+                <textarea id="subj-desc" class="form-input" rows="3" placeholder="Brief notes about the course..."></textarea>
+            </div>
+            <div class="flex justify-between" style="margin-top: 24px;">
+                <button type="button" class="btn btn-outline" onclick="toggleSubjectModal(false)">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Subject</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Topics Sidebar/Drawer (for selected subject) -->
+<div id="topics-drawer" class="modal-overlay" style="justify-content: flex-end; align-items: flex-start;">
+    <div class="modal-content topics-drawer-content">
+        <div class="card-header">
+            <h3 id="drawer-subject-name">Subject Topics</h3>
+            <button class="btn btn-outline btn-sm" onclick="toggleTopicsDrawer(false)">×</button>
+        </div>
+        <div class="drawer-body">
+            <button class="btn btn-primary btn-sm" style="width: 100%; margin-bottom: 20px;" onclick="showAddTopicForm()">
+                <i class="fas fa-plus"></i> Add New Topic
+            </button>
+            
+            <div id="add-topic-section" style="display: none; background: var(--gray-50); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h4>New Topic</h4>
+                <form id="topic-form">
+                    <div class="form-group">
+                        <label class="form-label">Topic Name</label>
+                        <input type="text" id="topic-name" class="form-input" placeholder="e.g. Dynamic Programming" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label">Est. Hours</label>
+                            <input type="number" id="topic-hours" class="form-input" step="0.5" min="0.5" value="2" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select id="topic-priority" class="form-input form-select">
+                                <option value="High">High</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex gap-md">
+                        <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="hideAddTopicForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="topics-list" class="flex flex-column gap-sm">
+                <!-- Topics list items -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/subjects.js') }}"></script>
+{% endblock %}

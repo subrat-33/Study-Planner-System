@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - StudySmart{% endblock %}
+
+{% block content %}
+<div class="container" style="text-align: center; padding: 100px 0;">
+    <div style="font-size: 6rem; color: var(--primary); margin-bottom: 24px;">404</div>
+    <h1>Oops! Page Not Found</h1>
+    <p style="color: var(--gray-500); max-width: 500px; margin: 0 auto 40px;">
+        The page you are looking for might have been moved, deleted, or never existed in the first place.
+    </p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-home"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

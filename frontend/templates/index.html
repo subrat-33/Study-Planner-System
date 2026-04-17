@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Study Planner - Master Your Academic Journey</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero {
+            padding: 100px 0;
+            background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+        }
+        .hero h1 { font-size: 3.5rem; margin-bottom: 24px; color: var(--gray-900); }
+        .hero p { font-size: 1.25rem; max-width: 700px; margin: 0 auto 40px; color: var(--gray-600); }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>StudySmart</span>
+            </div>
+            <div class="flex gap-md">
+                <a href="{{ url_for('login') }}" class="btn btn-outline">Log In</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started Free</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Crush Your Exams with AI-Powered Planning</h1>
+            <p>The smartest way to manage your syllabus, track your progress, and stay ahead of deadlines. Built specifically for B.Tech students.</p>
+            <div class="flex flex-center gap-lg">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Start Planning Now</a>
+                <a href="#features" class="btn btn-secondary btn-lg">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" style="padding: 80px 0;">
+        <div class="container">
+            <h2 style="text-align: center;">Everything You Need to Succeed</h2>
+            <div class="feature-grid">
+                <div class="card">
+                    <div style="color: var(--primary); font-size: 2.5rem; margin-bottom: 20px;"><i class="fas fa-magic"></i></div>
+                    <h3>Adaptive Scheduling</h3>
+                    <p>Fell behind? No worries. Our AI automatically redistributes your tasks to keep you on track without the stress.</p>
+                </div>
+                <div class="card">
+                    <div style="color: var(--success); font-size: 2.5rem; margin-bottom: 20px;"><i class="fas fa-chart-pie"></i></div>
+                    <h3>Progress Analytics</h3>
+                    <p>Visualize your study habits. See exactly how much syllabus you've covered and what needs more attention.</p>
+                </div>
+                <div class="card">
+                    <div style="color: var(--warning); font-size: 2.5rem; margin-bottom: 20px;"><i class="fas fa-bell"></i></div>
+                    <h3>Smart Reminders</h3>
+                    <p>Stay updated with deadline alerts and daily study summaries delivered right to your dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="margin-top: 0;">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2026 StudySmart. Empowering Students Worldwide.</p>
+        </div>
+    </footer>
+</body>
+</html>

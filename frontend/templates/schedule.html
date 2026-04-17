@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Study Timetable - StudySmart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .schedule-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .view-toggles {
+        display: flex;
+        background: var(--gray-200);
+        padding: 4px;
+        border-radius: 8px;
+    }
+    .view-toggles button {
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        background: transparent;
+        color: var(--gray-600);
+        transition: var(--transition-fast);
+    }
+    .view-toggles button.active {
+        background: white;
+        color: var(--primary);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .schedule-grid-container {
+        overflow-x: auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+    }
+    
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: 80px repeat(7, 1fr);
+        min-width: 900px;
+    }
+    
+    .grid-header {
+        background: var(--gray-50);
+        padding: 16px;
+        text-align: center;
+        font-weight: 700;
+        border-bottom: 1px solid var(--gray-200);
+        border-right: 1px solid var(--gray-200);
+    }
+    
+    .time-col {
+        background: var(--gray-50);
+        padding: 12px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        border-bottom: 1px solid var(--gray-200);
+        border-right: 1px solid var(--gray-200);
+    }
+    
+    .grid-cell {
+        height: 100px;
+        padding: 4px;
+        border-bottom: 1px solid var(--gray-100);
+        border-right: 1px solid var(--gray-100);
+        position: relative;
+    }
+    
+    .schedule-item {
+        background: var(--primary);
+        color: white;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        height: 100%;
+        cursor: pointer;
+        overflow: hidden;
+        transition: var(--transition-fast);
+        border-left: 4px solid rgba(0,0,0,0.1);
+    }
+    
+    .schedule-item:hover {
+        transform: scale(1.02);
+        z-index: 10;
+        box-shadow: var(--shadow-md);
+    }
+
+    .item-subject { font-weight: 800; margin-bottom: 2px; }
+    .item-topic { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Empty state */
+    .empty-schedule {
+        padding: 80px;
+        text-align: center;
+        background: white;
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header-section" style="margin-bottom: 32px;">
+        <h1>Your Personalized Timetable</h1>
+        <p style="color: var(--gray-500);">AI-optimized study slots based on your goals and deadlines</p>
+    </div>
+
+    <div class="schedule-controls">
+        <div class="view-toggles">
+            <button class="active" onclick="switchView('weekly')">Weekly</button>
+            <button onclick="switchView('daily')">Daily</button>
+            <button onclick="switchView('subject')">Subject-wise</button>
+        </div>
+
+        <div class="flex gap-md">
+            <button class="btn btn-outline" id="btn-export-pdf">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+            <button class="btn btn-primary" id="btn-generate-schedule" onclick="generateSchedule()">
+                <i class="fas fa-magic"></i> Regenerate Schedule
+            </button>
+        </div>
+    </div>
+
+    <div id="schedule-content">
+        <!-- Weekly Grid (Default) -->
+        <div class="schedule-grid-container" id="weekly-view">
+            <div class="schedule-grid">
+                <div class="grid-header">Time</div>
+                <div class="grid-header">Mon</div>
+                <div class="grid-header">Tue</div>
+                <div class="grid-header">Wed</div>
+                <div class="grid-header">Thu</div>
+                <div class="grid-header">Fri</div>
+                <div class="grid-header">Sat</div>
+                <div class="grid-header">Sun</div>
+
+                <!-- Time rows will be injected here -->
+                <div id="grid-body" style="grid-column: 1 / -1; display: contents;">
+                    <!-- JS will fill this -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily View (Hidden by default) -->
+        <div id="daily-view" style="display: none;">
+            <!-- Daily list items -->
+        </div>
+
+        <!-- Subject View (Hidden by default) -->
+        <div id="subject-view" style="display: none;">
+            <!-- Subject timeline items -->
+        </div>
+
+        <div id="empty-state" class="empty-schedule" style="display: none;">
+            <i class="fas fa-calendar-alt" style="font-size: 4rem; color: var(--gray-200); margin-bottom: 20px;"></i>
+            <h3>No schedule generated yet</h3>
+            <p style="color: var(--gray-500); margin-bottom: 24px;">Click the button above to create your optimized study plan.</p>
+            <button class="btn btn-primary" onclick="generateSchedule()">Generate My Schedule</button>
+        </div>
+    </div>
+</div>
+
+<!-- Task Details Modal -->
+<div id="task-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="card-header">
+            <h3 id="task-modal-title">Study Task</h3>
+            <button class="btn btn-outline btn-sm" onclick="toggleTaskModal(false)">×</button>
+        </div>
+        <div id="task-modal-body">
+            <p><strong>Subject:</strong> <span id="task-subj"></span></p>
+            <p><strong>Topic:</strong> <span id="task-topic"></span></p>
+            <p><strong>Time:</strong> <span id="task-time"></span></p>
+            <p><strong>Estimated Duration:</strong> <span id="task-duration"></span> hrs</p>
+            
+            <div class="flex gap-md" style="margin-top: 24px;">
+                <button class="btn btn-primary" id="btn-mark-complete">Mark Completed</button>
+                <button class="btn btn-outline" id="btn-reschedule">Reschedule</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+{% endblock %}
